@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="ckb-okr-report-tools",
+    name="ckb-report-tools",
     version="0.0.1",
     author="Liya",
     description="Utils library for ckb data analyze",
