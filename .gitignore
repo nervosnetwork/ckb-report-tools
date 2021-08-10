@@ -2,6 +2,8 @@ python-scripts/src/database.ini
 .env
 __pycache__
 *.egg-info
+.ipynb_checkpoints
+
 TAGS
 tags
 *.tags
