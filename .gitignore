@@ -3,6 +3,7 @@ python-scripts/src/database.ini
 __pycache__
 *.egg-info
 .ipynb_checkpoints
+*.xlsx
 
 TAGS
 tags
