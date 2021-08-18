@@ -4,17 +4,18 @@ import psycopg2
 from dateutil.parser import parse
 import json
 import datetime
+import sys
 from openpyxl import Workbook
 from openpyxl.formatting.rule import ColorScaleRule
 def block_analyzer_peer_week():
     conn = None
     try:
         # read connection parameters
-        params = common.config()
+        # params = common.config()
         # connect to the PostgreSQL server
         print('Connecting to the PostgreSQL database...')
-        conn = psycopg2.connect(**params)
-
+        # conn = psycopg2.connect(**params)
+        conn = psycopg2.connect(database=str(sys.argv[2]),user="postgres", password=str(sys.argv[3]), host=str(sys.argv[1]), port="5432")
         # create a cursor
         cur = conn.cursor()
         sql='SELECT time,number,hash FROM aggron_block WHERE time > current_timestamp - interval \'7 day\' ORDER BY time ASC'
@@ -147,6 +148,6 @@ def generate_csv_file():
     ws1['A15'] = "2_Blocks_Interval_PERCENTILE_999"
     ws1['B15'] = Block_2_Interval_PERCENTILE_999
 
-    wb.save("block_analyzer_"+datetime.datetime.now().strftime('%Y%m%d%H%M%S')+".xlsx")
+    wb.save("block_analyzer_"+datetime.date.today().strftime('%Y%m%d')+".xlsx")
 if __name__ == '__main__':
     generate_csv_file()
