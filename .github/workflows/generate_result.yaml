@@ -1,0 +1,34 @@
+name: generate_result
+on:
+  schedule:
+    - cron: '0 8 * * 5'
+env:
+  GITHUNB_TOKEN: ${{secrets.GITHUNB_TOKEN}}
+jobs:
+  generate_block_interval_result:
+    name: generate_block_interval_result
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/checkout@v2
+    - name: install python requirements
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - run: |
+        cd ${{github.workspace}}/python-scripts
+        pip install -r requirements.txt
+        pip install psycopg2-binary
+    - name: generate_weekly_result 
+      run: |
+        ls
+        python3 ${{ github.workspace }}/python-scripts/src/block_analyzer.py ${{secrets.DB_HOST}} ${{secrets.DB_NAME}} ${{secrets.DB_PASSWORD}}
+        python3 ${{ github.workspace }}/python-scripts/src/generate_ci_result_v1.py
+        mkdir ${{ github.workspace }}/weekly_result
+        cp block_analyzer_*.xlsx ${{ github.workspace }}/weekly_result
+        cp weekly_CI_result_*.xlsx ${{ github.workspace }}/weekly_result
+    - name: upload-xls-file
+      uses: actions/upload-artifact@v2
+      with:
+        name: weekly_result
+        path: ${{ github.workspace }}/weekly_result
+      

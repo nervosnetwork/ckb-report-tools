@@ -8,9 +8,7 @@ import os
 from openpyxl import Workbook
 from dotenv import load_dotenv
 load_dotenv()
-ACCESS_TOKEN=os.environ.get("ACCESS_TOKEN")
-print(ACCESS_TOKEN)
-headers = {"Authorization": "token "+str(ACCESS_TOKEN)}
+headers = {"Authorization": "token "+str(os.getenv('GITHUNB_TOKEN'))}
 data = {}
 data['workflow_info']=[]
 def run_query(url): # A simple function to use requests.post to make the API call. Note the json= section.
@@ -73,7 +71,7 @@ def generate_useful_info():
     res=requests.get(url,headers=headers)
     generate_workflow_info(res.json())
     while 'next' in res.links.keys():
-        res=requests.get(res.links['next']['url'],headers={"Authorization": "token "+str(ACCESS_TOKEN)})
+        res=requests.get(res.links['next']['url'],headers={"Authorization": "token "+str(os.getenv('GITHUNB_TOKEN'))})
         is_break=generate_workflow_info(res.json())
         if is_break is True:
             break
@@ -120,6 +118,9 @@ def append_jobs_info_to_csv(workflow_id,jobs):
         Check_Current_Workflow_durations=""
         Check_Current_Workflow_conclusione=""
         Check_Current_start_time=""
+        Integration_test_max=""
+        UnitTest_test_max=""
+        Benchmarks_test_max=""
         for num in range(len(jobs["job_info"])):
             if (jobs["job_info"][num]["job_name"]).find("Linters (Linux)") != -1:
                 print("Linters (Linux)")
@@ -156,7 +157,6 @@ def append_jobs_info_to_csv(workflow_id,jobs):
             if (jobs["job_info"][num]["job_name"]).find("UnitTest (macOS)" ) != -1:
                 print("UnitTest (macOS)")
                 UnitTest_macOS_conclusion=jobs["job_info"][num]["job_conclusion"]
-                print(UnitTest_macOS_conclusion)
                 UnitTest_macOS_durations=(datetime.datetime.strptime(jobs["job_info"][num]["job_completed_at"],"%Y-%m-%dT%H:%M:%SZ") - datetime.datetime.strptime(jobs["job_info"][num]["job_started_at"],"%Y-%m-%dT%H:%M:%SZ")).total_seconds()
             if (jobs["job_info"][num]["job_name"]).find("UnitTest (Linux)" ) != -1:
                 print("UnitTest (Linux)")
@@ -183,7 +183,15 @@ def append_jobs_info_to_csv(workflow_id,jobs):
                 Check_Current_Workflow_conclusione=jobs["job_info"][num]["job_conclusion"]
                 Check_Current_start_time=jobs["job_info"][num]["job_started_at"]
                 Check_Current_Workflow_durations=(datetime.datetime.strptime(jobs["job_info"][num]["job_completed_at"],"%Y-%m-%dT%H:%M:%SZ") - datetime.datetime.strptime(jobs["job_info"][num]["job_started_at"],"%Y-%m-%dT%H:%M:%SZ")).total_seconds()
-        jobs_data=[workflow_id,Check_Current_Workflow_durations,Check_Current_Workflow_conclusione,Linters_macOS_durations,Linters_macOS_conclusion,Linters_Linux_durations,Linters_Linux_conclusion,Quick_Check_durations,Quick_Check_conclusion,WASM_build_durations,WASM_build_conclusion,Security_Audit_Licenses_durations,Security_Audit_Licenses_conclusion,UnitTest_macOS_durations,UnitTest_macOS_conclusion,UnitTest_Linux_durations,UnitTest_Linux_conclusion,UnitTest_Windows_durations,UnitTest_Windows_conclusion,Integration_Test_macOS_durations,Integration_Test_macOS_conclusion,Integration_Test_Linux_durations,Integration_Test_Linux_conclusion,Integration_Test_Windows_durations,Integration_Test_Windows_conclusion,Benchmarks_Test_macOS_durations,Benchmarks_Test_macOS_conclusion,Benchmarks_Test_Linux_durations,Benchmarks_Test_Linux_conclusion,ci_durations,ci_conclusion,Check_Current_start_time]
+        Integration_list=[Integration_Test_macOS_durations,Integration_Test_Linux_durations,Integration_Test_Windows_durations]
+        Integration_test_max=max(Integration_list)
+        UnitTest_list=[UnitTest_macOS_durations,UnitTest_Linux_durations,UnitTest_Windows_durations]
+        UnitTest_test_max=max(UnitTest_list)
+        Benchmarks_list=[Benchmarks_Test_macOS_durations,Benchmarks_Test_Linux_durations]
+        Benchmarks_test_max=max(Benchmarks_list)
+        Liners_list=[Linters_Linux_durations,Linters_macOS_durations]
+        Liners_max=max(Liners_list)
+        jobs_data=[workflow_id,Check_Current_Workflow_durations,Check_Current_Workflow_conclusione,Linters_macOS_durations,Linters_macOS_conclusion,Linters_Linux_durations,Linters_Linux_conclusion,Quick_Check_durations,Quick_Check_conclusion,WASM_build_durations,WASM_build_conclusion,Security_Audit_Licenses_durations,Security_Audit_Licenses_conclusion,UnitTest_macOS_durations,UnitTest_macOS_conclusion,UnitTest_Linux_durations,UnitTest_Linux_conclusion,UnitTest_Windows_durations,UnitTest_Windows_conclusion,Integration_Test_macOS_durations,Integration_Test_macOS_conclusion,Integration_Test_Linux_durations,Integration_Test_Linux_conclusion,Integration_Test_Windows_durations,Integration_Test_Windows_conclusion,Benchmarks_Test_macOS_durations,Benchmarks_Test_macOS_conclusion,Benchmarks_Test_Linux_durations,Benchmarks_Test_Linux_conclusion,ci_durations,ci_conclusion,Check_Current_start_time,Integration_test_max,UnitTest_test_max,Benchmarks_test_max,Liners_max]
         return jobs_data
 def generate_csv_file():
     generate_useful_info()
@@ -237,7 +245,10 @@ def generate_csv_file():
     jobs_sheet['AD1'] = "ci_durations"
     jobs_sheet['AE1'] = "ci_conclusion"
     jobs_sheet['AF1'] = "Check_Current_start_time"
-
+    jobs_sheet['AG1'] = "Integration_test_max"
+    jobs_sheet['AH1'] = "UnitTest_test_max"
+    jobs_sheet['AI1'] = "Benchmarks_test_max"
+    jobs_sheet['AJ1'] = "Liners_max"
     for i in range(len(data["workflow_info"])):
         start_time=datetime.datetime.strptime(data["workflow_info"][i]["workflow_created_at"],"%Y-%m-%dT%H:%M:%SZ")
         update_time=datetime.datetime.strptime(data["workflow_info"][i]["workflow_updated_at"],"%Y-%m-%dT%H:%M:%SZ")
@@ -250,7 +261,7 @@ def generate_csv_file():
         workflow_pending_time=""
         Jobs_execion_time_avg='=AVERAGE(jobs_info!AD'+str(ws.max_row+1)+',jobs_info!AB'+str(ws.max_row+1)+',jobs_info!Z'+str(ws.max_row+1)+',jobs_info!X'+str(ws.max_row+1)+',jobs_info!V'+str(ws.max_row+1)+',jobs_info!T'+str(ws.max_row+1)+',jobs_info!R'+str(ws.max_row+1)+',jobs_info!P'+str(ws.max_row+1)+',jobs_info!N'+str(ws.max_row+1)+',jobs_info!L'+str(ws.max_row+1)+',jobs_info!J'+str(ws.max_row+1)+',jobs_info!H'+str(ws.max_row+1)+',jobs_info!F'+str(ws.max_row+1)+',jobs_info!D'+str(ws.max_row+1)+',jobs_info!B'+str(ws.max_row+1)+')'
         Jobs_execion_time_Max='=MAX(jobs_info!AD'+str(ws.max_row+1)+',jobs_info!AB'+str(ws.max_row+1)+',jobs_info!Z'+str(ws.max_row+1)+',jobs_info!X'+str(ws.max_row+1)+',jobs_info!V'+str(ws.max_row+1)+',jobs_info!T'+str(ws.max_row+1)+',jobs_info!R'+str(ws.max_row+1)+',jobs_info!P'+str(ws.max_row+1)+',jobs_info!N'+str(ws.max_row+1)+',jobs_info!L'+str(ws.max_row+1)+',jobs_info!J'+str(ws.max_row+1)+',jobs_info!H'+str(ws.max_row+1)+',jobs_info!F'+str(ws.max_row+1)+',jobs_info!D'+str(ws.max_row+1)+',jobs_info!B'+str(ws.max_row+1)+')'
-        Jobs_execion_time_SUM='=SUM(jobs_info!AD'+str(ws.max_row+1)+',jobs_info!AB'+str(ws.max_row+1)+',jobs_info!Z'+str(ws.max_row+1)+',jobs_info!X'+str(ws.max_row+1)+',jobs_info!V'+str(ws.max_row+1)+',jobs_info!T'+str(ws.max_row+1)+',jobs_info!R'+str(ws.max_row+1)+',jobs_info!P'+str(ws.max_row+1)+',jobs_info!N'+str(ws.max_row+1)+',jobs_info!L'+str(ws.max_row+1)+',jobs_info!J'+str(ws.max_row+1)+',jobs_info!H'+str(ws.max_row+1)+',jobs_info!F'+str(ws.max_row+1)+',jobs_info!D'+str(ws.max_row+1)+',jobs_info!B'+str(ws.max_row+1)+')'
+        Jobs_execion_time_SUM='=SUM(jobs_info!AD'+str(ws.max_row+1)+',jobs_info!AG'+str(ws.max_row+1)+',jobs_info!AH'+str(ws.max_row+1)+',jobs_info!AI'+str(ws.max_row+1)+',jobs_info!AJ'+str(ws.max_row+1)+',jobs_info!L'+str(ws.max_row+1)+',jobs_info!J'+str(ws.max_row+1)+',jobs_info!H'+str(ws.max_row+1)+',jobs_info!B'+str(ws.max_row+1)+')'
         if len(jobs['job_info']) != 0:
             first_job_start_time=datetime.datetime.strptime(jobs["job_info"][1]["job_started_at"],"%Y-%m-%dT%H:%M:%SZ")
             print("first_job_start_time: "+str(first_job_start_time))
@@ -279,7 +290,7 @@ def generate_csv_file():
 
     Linters_macOS_durations_avg='=AVERAGE(jobs_info!D2:D'+str(jobs_sheet.max_row)+')/'+str(60)
     Linters_macOS_percentile_99='=PERCENTILE(IF(jobs_info!E2:E'+str(jobs_sheet.max_row)+'="success",jobs_info!D2:D'+str(jobs_sheet.max_row)+'),0.99)/'+str(60)
-    Linters_macOS_max='=MAX(jobs_info!D2:D'+str(jobs_sheet.max_row)+'/)'+str(60)
+    Linters_macOS_max='=MAX(jobs_info!D2:D'+str(jobs_sheet.max_row)+')/'+str(60)
     Linters_macOS_success_rate='=COUNTIF(jobs_info!E2:E'+str(jobs_sheet.max_row)+',"success")/'+str(jobs_sheet.max_row-1)+'*100'
 
     Linters_Linux_durations_avg='=AVERAGE(jobs_info!F2:F'+str(jobs_sheet.max_row)+')/'+str(60)
@@ -495,7 +506,7 @@ def generate_csv_file():
     data_analyze['A80'] = "ci_durations_max(minues)"
     data_analyze['B80'] = ci_durations_max
 
-    wb.save("weekly_CI_result_"+datetime.datetime.now().strftime('%Y%m%d%H%M%S')+".xlsx")
+    wb.save("weekly_CI_result_"+datetime.date.today().strftime('%Y%m%d')+".xlsx")
 if __name__ == '__main__':
 #   generate_useful_info()
   generate_csv_file()
