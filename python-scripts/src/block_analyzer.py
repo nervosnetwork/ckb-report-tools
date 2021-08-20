@@ -50,6 +50,9 @@ def generate_csv_file():
     block_analyzer_peer_week()
     f = open("block_data.txt","r") 
     data = json.load(f)
+    print("data start ")
+    print(data)
+    print("data end ")
     wb = Workbook()
     ws = wb.active
     ws1= wb.create_sheet("Datas_info",0)
