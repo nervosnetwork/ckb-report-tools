@@ -15,6 +15,9 @@ def block_analyzer_peer_week():
         # connect to the PostgreSQL server
         print('Connecting to the PostgreSQL database...')
         # conn = psycopg2.connect(**params)
+        print(str(sys.argv[2]))
+        print(str(sys.argv[3]))
+        print(str(sys.argv[1]))
         conn = psycopg2.connect(database=str(sys.argv[2]),user="postgres", password=str(sys.argv[3]), host=str(sys.argv[1]), port="5432")
         # create a cursor
         cur = conn.cursor()
