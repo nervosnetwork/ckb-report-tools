@@ -1,0 +1,34 @@
+name: 'send-metrics-to-statsd'
+description: 'send-metrics-to-statsd'
+inputs:
+  WORKFLOW_ID:  # id of input
+    description: 'WORKFLOW_ID to collect'
+    required: true
+  GITHUB_REPOSITORY:
+    description: "WORKFLOW_ID's REPOSITORY"
+    required: true
+  GITHUB_TOKEN:  # id of input
+    description: 'Github token to call github api'
+    required: true
+  STATSD_HOST: #statsd hots
+    description: 'statsd hots'
+    required: true
+  STATSD_PORT: #statsd hots
+    description: 'statsd port'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: install requirments
+      run: pip install statsd
+      shell: bash
+    - id: prologue
+      run: python ${{ github.action_path }}/collect_metrics.py
+      shell: bash
+      env:
+        WORKFLOW_ID:  ${{ inputs.WORKFLOW_ID }}
+        GITHUB_TOKEN:  ${{ inputs.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY:  ${{ inputs.GITHUB_REPOSITORY }}
+        STATSD_HOST: ${{ inputs.STATSD_HOST }}
+        STATSD_PORT: ${{ inputs.STATSD_PORT }}
+
