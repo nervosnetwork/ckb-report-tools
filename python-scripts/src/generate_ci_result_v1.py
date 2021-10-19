@@ -8,7 +8,7 @@ import os
 from openpyxl import Workbook
 from dotenv import load_dotenv
 load_dotenv()
-headers = {"Authorization": "token "+str(os.getenv('GITHUNB_TOKEN'))}
+headers = {"Authorization": "token "+str(os.getenv('GITHUB_TOKEN'))}
 data = {}
 data['workflow_info']=[]
 def run_query(url): # A simple function to use requests.post to make the API call. Note the json= section.
@@ -71,7 +71,7 @@ def generate_useful_info():
     res=requests.get(url,headers=headers)
     generate_workflow_info(res.json())
     while 'next' in res.links.keys():
-        res=requests.get(res.links['next']['url'],headers={"Authorization": "token "+str(os.getenv('GITHUNB_TOKEN'))})
+        res=requests.get(res.links['next']['url'],headers={"Authorization": "token "+str(os.getenv('GITHUB_TOKEN'))})
         is_break=generate_workflow_info(res.json())
         if is_break is True:
             break

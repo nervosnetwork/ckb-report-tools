@@ -1,0 +1,77 @@
+name: collect_ci_metrics
+on:
+  schedule:
+    - cron: '0 8 * * 5'
+  workflow_dispatch:
+jobs:
+  generate_block_interval_result:
+    name: generate_block_interval_result
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/checkout@v2
+    - name: collect ci_wasm_build_ubuntu duration metrics
+      id: collect_metrics
+      uses: ./.github/actions/statsd
+      with:
+        WORKFLOW_ID: ci_wasm_build_ubuntu
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{github.repository}}
+        STATSD_HOST: ${{ secrets.STATSD_HOST }}
+        STATSD_PORT: ${{ secrets.STATSD_PORT }}
+    - name: collect ci_benchmarks_ubuntu duration metrics
+      id: ci_benchmarks_ubuntu
+      uses: ./.github/actions/statsd
+      with:
+        WORKFLOW_ID: ci_benchmarks_ubuntu
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{github.repository}}
+        STATSD_HOST: ${{ secrets.STATSD_HOST }}
+        STATSD_PORT: ${{ secrets.STATSD_PORT }}
+    - name: collect ci_integration_tests_ubuntu duration metrics
+      id: ci_integration_tests_ubuntu
+      uses: ./.github/actions/statsd
+      with:
+        WORKFLOW_ID: ci_integration_tests_ubuntu
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{github.repository}}
+        STATSD_HOST: ${{ secrets.STATSD_HOST }}
+        STATSD_PORT: ${{ secrets.STATSD_PORT }}
+    - name: collect ci_quick_checks_ubuntu duration metrics
+      id: ci_quick_checks_ubuntu
+      uses: ./.github/actions/statsd
+      with:
+        WORKFLOW_ID: ci_quick_checks_ubuntu
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{github.repository}}
+        STATSD_HOST: ${{ secrets.STATSD_HOST }}
+        STATSD_PORT: ${{ secrets.STATSD_PORT }}
+    - name: collect ci_cargo_deny_ubuntu duration metrics
+      id: ci_cargo_deny_ubuntu
+      uses: ./.github/actions/statsd
+      with:
+        WORKFLOW_ID: ci_cargo_deny_ubuntu
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{github.repository}}
+        STATSD_HOST: ${{ secrets.STATSD_HOST }}
+        STATSD_PORT: ${{ secrets.STATSD_PORT }}
+    - name: collect ci_linters_ubuntu duration metrics
+      id: ci_linters_ubuntu
+      uses: ./.github/actions/statsd
+      with:
+        WORKFLOW_ID: ci_linters_ubuntu
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{github.repository}}
+        STATSD_HOST: ${{ secrets.STATSD_HOST }}
+        STATSD_PORT: ${{ secrets.STATSD_PORT }}
+    - name: collect ci_unit_tests_ubuntu duration metrics
+      id: ci_unit_tests_ubuntu
+      uses: ./.github/actions/statsd
+      with:
+        WORKFLOW_ID: ci_unit_tests_ubuntu
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{github.repository}}
+        STATSD_HOST: ${{ secrets.STATSD_HOST }}
+        STATSD_PORT: ${{ secrets.STATSD_PORT }}
+
+  
+      
